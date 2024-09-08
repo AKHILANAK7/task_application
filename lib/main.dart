@@ -1,22 +1,46 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:url_strategy/url_strategy.dart';
+import 'package:task_application/screens/home_screen.dart';
+import 'package:task_application/screens/post_screen.dart';
+import 'package:uni_links/uni_links.dart';
 
-import 'screens/home_screen.dart';
-import 'screens/post_screen.dart';
+void main() => runApp(MyApp());
 
-void main() {
-  // For Web: Clean URL strategy without hash.
-  setPathUrlStrategy();
-  runApp(const MyApp());
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _MyAppState extends State<MyApp> {
+  late StreamSubscription _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinkListener();
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+
+  // Listen for deep link
+  void _initDeepLinkListener() {
+    _sub = uriLinkStream.listen((Uri? uri) {
+      if (uri != null && uri.scheme == 'myapp') {
+        String postId = uri.pathSegments[1]; // e.g., 'image1'
+        Navigator.pushNamed(context, '/post/$postId');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Web Deep Linking',
+      title: 'Flutter Deep Link Example',
       initialRoute: '/',
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
